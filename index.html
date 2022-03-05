@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@800&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/earlyaccess/notosanskr.css">
+        <title>Index</title>
+        <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <div class="background"></div>
+        <div class="main-content"></div>
+            <div class="main_text">얼굴을 보여주세요.</div>
+            <button type="button" onclick="init()">Start</button>
+            <div class="label-container" id="label-container"></div>
+        </div>
+        <div class="webcam-container" id="webcam-container"></div>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+        <script type="text/javascript">
+            // More API functions here:
+            // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+            // the link to your model provided by Teachable Machine export panel
+            const URL = "https://teachablemachine.withgoogle.com/models/WCUO2kwJa/";
+
+            let model, webcam, labelContainer, maxPredictions;
+            const data={
+                "마스크안씀":{
+                    "name":"마스크 안씀",
+                    "message" : "마스크를 써주세요."
+                },
+                "마스크씀":{
+                    "name":"마스크 씀",
+                    "message" : "안전합니다."
+                }
+            }
+            // Load the image model and setup the webcam
+            async function init() {
+                const modelURL = URL + "model.json";
+                const metadataURL = URL + "metadata.json";
+
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // Convenience function to setup a webcam
+                const flip = true; // whether to flip the webcam
+                webcam = new tmImage.Webcam(1200, 800, flip); // width, height, flip
+                await webcam.setup(); // request access to the webcam
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // append elements to the DOM
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                labelContainer = document.getElementById("label-container");
+                for (let i = 0; i < maxPredictions; i++) { // and class labels
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            }
+
+            async function loop() {
+                webcam.update(); // update the webcam frame
+                await predict();
+                window.requestAnimationFrame(loop);
+            }
+
+            function display_image(src, width, height, id) {
+                var a = document.createElement("img");
+                a.src = src;
+                a.width = width;
+                a.height = height;
+                a.id = id;
+                document.body.appendChild(a);
+            }
+
+            var imgArray = new Array();
+            imgArray[0] = "images/img_1.gif";
+            imgArray[1] = "images/img_2.gif";
+            imgArray[2] = "images/img_3.gif";
+            imgArray[3] = "images/img_4.gif";
+            imgArray[4] = "images/img_5.gif";
+            imgArray[5] = "images/img_6.gif";
+            imgArray[6] = "images/img_7.gif";
+            imgArray[7] = "images/img_8.gif";
+            imgArray[8] = "images/img_9.gif";
+            imgArray[9] = "images/img_10.gif";
+            imgArray[10] = "images/img_11.gif";
+            imgArray[11] = "images/img_12.gif";
+            imgArray[12] = "images/img_13.gif";
+            imgArray[13] = "images/img_14.gif";
+            imgArray[14] = "images/img_15.gif";
+            imgArray[15] = "images/img_16.gif";
+            imgArray[16] = "images/img_17.gif";
+            imgArray[17] = "images/img_18.gif";
+
+
+            var status="마스크 안씀"
+
+            // run the webcam image through the image model
+            async function predict() {
+                const prediction = await model.predict(webcam.canvas);
+                // predict can take in an image, video or canvas html element
+                if(prediction[0].probability.toFixed(2) == '1.00'){
+
+                    if(status=="마스크 씀"){
+                      var child = document.getElementById("JavaScriptImage_1");
+                      child.parentNode.removeChild(child);
+                      var child = document.getElementById("JavaScriptImage_2");
+                      child.parentNode.removeChild(child);
+                    }
+                    status="마스크 안씀"
+                }else if(prediction[1].probability.toFixed(2) == '1.00'){
+
+                    if(status=="마스크 안씀"){
+                      index_1 = Math.floor(Math.random() * imgArray.length);
+                      index_2 = Math.floor(Math.random() * imgArray.length);
+                      display_image(imgArray[index_1], 200, 200, 'JavaScriptImage_1');
+                      display_image(imgArray[index_2], 400, 200, 'JavaScriptImage_2');
+                  }
+                    status="마스크 씀"
+                }
+
+                for (let i = 0; i < maxPredictions; i++) {
+                    if(prediction[i].probability.toFixed(2) == '1.00'){
+                            const item=data[prediction[i].className]
+                            labelContainer.innerHTML=`${item.message}`
+                    }
+                }
+            }
+
+        </script>
+    </body>
+</html>
