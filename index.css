@@ -3,6 +3,10 @@ body {
 
 }
 
+.button_1 {
+	margin-left: 180px;
+}
+
 #JavaScriptImage_1 {
 	position: absolute;
 	z-index: 10;
